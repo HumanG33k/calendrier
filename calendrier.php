@@ -31,7 +31,7 @@
 			//initialise quelques évenements
 			// create somes events
 			$events = array();
-			$events[0] = array('date_begin' => '2014-11-06', 'date_end' => '2016-01-07', 'event' => 'studies', 'important' => 'hight');
+			$events[0] = array('date_begin' => '2014-11-06', 'date_end' => '2016-04-07', 'event' => 'studies', 'important' => 'hight');
 			$events[1] = array('date_begin' => '2015-07-24', 'date_end' => '2015-07-24', 'event' => 'personal', 'important' => 'medium');
 			$events[2] = array('date_begin' => '2015-07-24', 'date_end' => '2015-07-24', 'event' => 'personal', 'important' => 'hight');
 			$events[3] = array('date_begin' => '2015-07-24', 'date_end' => '2015-07-24', 'event' => 'truc', 'important' => 'low');
@@ -295,6 +295,8 @@
 											$dateEventDayEnd = $dateEventDayEnd + 0;
 	
 											if ($day <> null) {
+												//change la couleur
+												// change color
 												if ($e['important'] == 'hight') {
 													$col = "danger";
 												} elseif ($e['important'] == 'medium') {
@@ -304,10 +306,20 @@
 												}
 												if ($yearN >= $dateEventYearBegin && $yearN <= $dateEventYearEnd) {
 													if ($yearN == $dateEventYearBegin || $yearN == $dateEventYearEnd) {
-														if ($monthN >= $dateEventMonthBegin && $monthN <= $dateEventMonthEnd) {
-															if ($monthN == $dateEventMonthBegin || $monthN == $dateEventMonthEnd) {
-																if ($dateEventMonthBegin == $dateEventMonthEnd) {
-																	if ($day >= $dateEventDayBegin && $day <= $dateEventDayEnd) { ?>
+														if ($monthN == $dateEventMonthBegin || $monthN == $dateEventMonthEnd) {
+															if ($monthN == $dateEventMonthBegin && $monthN == $dateEventMonthEnd) {
+																if ($day >= $dateEventDayBegin && $day <= $dateEventDayEnd) { ?>
+																	<div class="container-fluid">
+																		<div class="row">
+																			<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
+																			</button>
+																		</div>
+																	</div>
+																<?php }
+															}
+															else {
+																if ($monthN == $dateEventMonthBegin) {
+																	if ($day >= $dateEventDayBegin) { ?>
 																		<div class="container-fluid">
 																			<div class="row">
 																				<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
@@ -316,38 +328,26 @@
 																		</div>
 																	<?php }
 																}
-																else {
-																	if ($monthN == $dateEventMonthBegin) {
-																		if ($day >= $dateEventDayBegin) { ?>
-																			<div class="container-fluid">
-																				<div class="row">
-																					<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
-																					</button>
-																				</div>
+																elseif ($monthN == $dateEventMonthEnd) {
+																	if ($day <= $dateEventDayEnd) { ?>
+																		<div class="container-fluid">
+																			<div class="row">
+																				<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
+																				</button>
 																			</div>
-																		<?php }
-																	}
-																	if ($monthN == $dateEventMonthEnd) {
-																		if ($day <= $dateEventDayEnd) { ?>
-																			<div class="container-fluid">
-																				<div class="row">
-																					<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
-																					</button>
-																				</div>
-																			</div>
-																		<?php }
-																	}
+																		</div>
+																	<?php }
 																}
 															}
-															else { ?>
-																<div class="container-fluid">
-																	<div class="row">
-																		<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
-																		</button>
-																	</div>
-																</div>
-															<?php }
 														}
+														else { ?>
+															<div class="container-fluid">
+																<div class="row">
+																	<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
+																	</button>
+																</div>
+															</div>
+														<?php }
 													}
 													else { ?>
 														<div class="container-fluid">
