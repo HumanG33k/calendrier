@@ -35,8 +35,10 @@
 			$events[1] = array('date_begin' => '2015-07-24', 'date_end' => '2015-07-24', 'event' => 'personal', 'important' => 'medium');
 			$events[2] = array('date_begin' => '2015-07-24', 'date_end' => '2015-07-24', 'event' => 'personal', 'important' => 'hight');
 			$events[3] = array('date_begin' => '2015-07-24', 'date_end' => '2015-07-24', 'event' => 'truc', 'important' => 'low');
-			$events[4] = array('date_begin' => '2015-06-06', 'date_end' => '2016-01-07', 'event' => 'travel', 'important' => 'low');
-			$events[5] = array('date_begin' => '2015-06-06', 'date_end' => '2016-01-07', 'event' => 'La j\'ai vraiment pas d\'idée', 'important' => 'medium');
+			$events[4] = array('date_begin' => '2015-06-06', 'date_end' => '2015-11-07', 'event' => 'travel', 'important' => 'low');
+			$events[5] = array('date_begin' => '2015-07-05', 'date_end' => '2015-07-09', 'event' => 'La j\'ai vraiment pas d\'idée', 'important' => 'medium');
+
+			$intervalYear = 3;
 
 			//récupère les dates actuelles
 			// catch actualy dates
@@ -139,8 +141,8 @@
 				<div class="form-group">
 					<label for="year">Année :</label>
 					<select class="form-control" name="year" id="year">
-						<?php for ($i=0; $i < 7; $i++) {
-							$year = $yearNow - 3 + $i;
+						<?php for ($i=0; $i < (($intervalYear) * 2 + 1); $i++) {
+							$year = $yearNow - $intervalYear + $i;
 							if ($year == $yearN) {
 							 	$default = 'selected';
 							}
@@ -176,7 +178,7 @@
 						<th colspan="7">
 							<h2>
 								<!-- Si l'utilisateur cherche à voir plus loin que trois ans en arrière, désactive le bouton -->
-								<?php if ($yearN <= $yearNow - 3) { ?>
+								<?php if ($yearN <= $yearNow - $intervalYear) { ?>
 									<button class="btn btn-primary btn-sm pull-left" role="button" disabled="disabled" href="#">
 										<span class="glyphicon glyphicon-backward"></span>
 									</button>
@@ -193,7 +195,7 @@
 								<!--  -->
 								<?=$yearN?>
 								<!-- Si l'utilisateur cherche à voir plus loin que trois ans en avant, désactive le bouton -->
-								<?php if ($yearN >= $yearNow + 3) { ?>
+								<?php if ($yearN >= $yearNow + $intervalYear) { ?>
 									<button class="btn btn-primary btn-sm pull-right" role="button" disabled="disabled">
 										<span class="glyphicon glyphicon-forward"></span>
 									</button>
@@ -293,37 +295,63 @@
 											$dateEventDayEnd = $dateEventDayEnd + 0;
 	
 											if ($day <> null) {
+												if ($e['important'] == 'hight') {
+													$col = "danger";
+												} elseif ($e['important'] == 'medium') {
+													$col = "warning";
+												} elseif ($e['important'] == 'low') {
+													$col = "success";
+												}
 												if ($yearN >= $dateEventYearBegin && $yearN <= $dateEventYearEnd) {
-													if (
-															(($yearN == $dateEventYearBegin && $monthN >= $dateEventMonthBegin) 
-																&& 
-																(($monthN == $dateEventMonthBegin && $day >= $dateEventDayBegin) 
-																	|| 
-																($monthN > $dateEventMonthBegin))
-															) 
-															|| 
-															(($yearN > $dateEventYearBegin) 
-																&& 
-																((($yearN == $dateEventYearEnd && $monthN <= $dateEventMonthEnd) 
-																	&& 
-																	(($monthN == $dateEventMonthEnd && $day <= $dateEventDayEnd) 
-																		|| 
-																	($monthN < $dateEventMonthEnd))) 
-																		|| 
-																	($yearN < $dateEventYearEnd)
-																)
-															)
-														) 
-													{ ?>
+													if ($yearN == $dateEventYearBegin || $yearN == $dateEventYearEnd) {
+														if ($monthN >= $dateEventMonthBegin && $monthN <= $dateEventMonthEnd) {
+															if ($monthN == $dateEventMonthBegin || $monthN == $dateEventMonthEnd) {
+																if ($dateEventMonthBegin == $dateEventMonthEnd) {
+																	if ($day >= $dateEventDayBegin && $day <= $dateEventDayEnd) { ?>
+																		<div class="container-fluid">
+																			<div class="row">
+																				<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
+																				</button>
+																			</div>
+																		</div>
+																	<?php }
+																}
+																else {
+																	if ($monthN == $dateEventMonthBegin) {
+																		if ($day >= $dateEventDayBegin) { ?>
+																			<div class="container-fluid">
+																				<div class="row">
+																					<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
+																					</button>
+																				</div>
+																			</div>
+																		<?php }
+																	}
+																	if ($monthN == $dateEventMonthEnd) {
+																		if ($day <= $dateEventDayEnd) { ?>
+																			<div class="container-fluid">
+																				<div class="row">
+																					<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
+																					</button>
+																				</div>
+																			</div>
+																		<?php }
+																	}
+																}
+															}
+															else { ?>
+																<div class="container-fluid">
+																	<div class="row">
+																		<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
+																		</button>
+																	</div>
+																</div>
+															<?php }
+														}
+													}
+													else { ?>
 														<div class="container-fluid">
 															<div class="row">
-																<?php if ($e['important'] == 'hight') {
-																	$col = "danger";
-																} elseif ($e['important'] == 'medium') {
-																	$col = "warning";
-																} elseif ($e['important'] == 'low') {
-																	$col = "success";
-																} ?>
 																<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
 																</button>
 															</div>
