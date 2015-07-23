@@ -297,12 +297,22 @@
 											if ($day <> null) {
 												//change la couleur
 												// change color
-												if ($e['important'] == 'hight') {
-													$col = "danger";
-												} elseif ($e['important'] == 'medium') {
-													$col = "warning";
-												} elseif ($e['important'] == 'low') {
-													$col = "success";
+												switch ($e['important']) {
+													case 'hight':
+														$col = "danger";
+														break;
+
+													case 'medium':
+														$col = "warning";
+														break;
+														
+													case 'low':
+														$col = "success";
+														break;
+													
+													default:
+														$col = "info";
+														break;
 												}
 												if ($yearN >= $dateEventYearBegin && $yearN <= $dateEventYearEnd) {
 													if ($yearN == $dateEventYearBegin || $yearN == $dateEventYearEnd) {

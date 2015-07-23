@@ -2,7 +2,7 @@
 Calendrier adaptable avec BDD et facilement parcourable.</br>
 /  Calendar adaptable with database and frendly.</br>
 Vous pouvez créer des, évenements soit sur une durée donnée, soit sur une journée et leur attribuer une prioritée.</br>
-/  You can add events, even in some days or months, evene in one day and set him somme priority.</br>
+/  You can add events, even in some days or months, even in one day and set him some priority.</br>
 Le jour actuel est légèrement coloré (ici en gris).</br>
 /  The actualy day is color (grey).</br>
 90% du style est géré avec bootstrap.</br>
