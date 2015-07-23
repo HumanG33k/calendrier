@@ -31,7 +31,7 @@
 			//initialise quelques évenements
 			// create somes events
 			$events = array();
-			$events[0] = array('date_begin' => '2014-11-06', 'date_end' => '2016-04-07', 'event' => 'studies', 'important' => 'hight');
+			$events[0] = array('date_begin' => '2014-11-06', 'date_end' => '2016-04-01', 'event' => 'studies', 'important' => 'hight');
 			$events[1] = array('date_begin' => '2015-07-24', 'date_end' => '2015-07-24', 'event' => 'personal', 'important' => 'medium');
 			$events[2] = array('date_begin' => '2015-07-24', 'date_end' => '2015-07-24', 'event' => 'personal', 'important' => 'hight');
 			$events[3] = array('date_begin' => '2015-07-24', 'date_end' => '2015-07-24', 'event' => 'truc', 'important' => 'low');
@@ -297,60 +297,32 @@
 											if ($day <> null) {
 												//change la couleur
 												// change color
-												switch ($e['important']) {
-													case 'hight':
-														$col = "danger";
-														break;
-
-													case 'medium':
-														$col = "warning";
-														break;
-														
-													case 'low':
-														$col = "success";
-														break;
-													
-													default:
-														$col = "info";
-														break;
+												if ($e['important'] == 'hight') {
+													$col = "danger";
+												} elseif ($e['important'] == 'medium') {
+													$col = "warning";
+												} elseif ($e['important'] == 'low') {
+													$col = "success";
 												}
-												if ($yearN >= $dateEventYearBegin && $yearN <= $dateEventYearEnd) {
-													if ($yearN == $dateEventYearBegin || $yearN == $dateEventYearEnd) {
-														if ($monthN == $dateEventMonthBegin || $monthN == $dateEventMonthEnd) {
-															if ($monthN == $dateEventMonthBegin && $monthN == $dateEventMonthEnd) {
-																if ($day >= $dateEventDayBegin && $day <= $dateEventDayEnd) { ?>
-																	<div class="container-fluid">
-																		<div class="row">
-																			<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
-																			</button>
-																		</div>
-																	</div>
-																<?php }
-															}
-															else {
-																if ($monthN == $dateEventMonthBegin) {
-																	if ($day >= $dateEventDayBegin) { ?>
-																		<div class="container-fluid">
-																			<div class="row">
-																				<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
-																				</button>
-																			</div>
-																		</div>
-																	<?php }
-																}
-																elseif ($monthN == $dateEventMonthEnd) {
-																	if ($day <= $dateEventDayEnd) { ?>
-																		<div class="container-fluid">
-																			<div class="row">
-																				<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
-																				</button>
-																			</div>
-																		</div>
-																	<?php }
-																}
-															}
-														}
-														else { ?>
+												if ($yearN > $dateEventYearBegin && $yearN < $dateEventYearEnd) { ?>
+													<div class="container-fluid">
+														<div class="row">
+															<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
+															</button>
+														</div>
+													</div>
+												<?php }
+												elseif ($dateEventYearBegin == $dateEventYearEnd && $yearN == $dateEventYearEnd) {
+													if ($monthN > $dateEventMonthBegin && $monthN < $dateEventMonthEnd) { ?>
+														<div class="container-fluid">
+															<div class="row">
+																<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
+																</button>
+															</div>
+														</div>
+													<?php }
+													elseif ($dateEventMonthBegin == $dateEventMonthEnd && $monthN == $dateEventMonthBegin) {
+														if ($day >= $dateEventDayBegin && $day <= $dateEventDayEnd) { ?>
 															<div class="container-fluid">
 																<div class="row">
 																	<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
@@ -359,7 +331,29 @@
 															</div>
 														<?php }
 													}
-													else { ?>
+													elseif ($monthN == $dateEventMonthBegin && $monthN < $dateEventMonthEnd) {
+														if ($day >= $dateEventDayBegin) { ?>
+															<div class="container-fluid">
+																<div class="row">
+																	<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
+																	</button>
+																</div>
+															</div>
+														<?php }
+													}
+													elseif ($monthN == $dateEventMonthEnd && $monthN > $dateEventMonthBegin) {
+														if ($day <= $dateEventDayEnd) { ?>
+															<div class="container-fluid">
+																<div class="row">
+																	<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
+																	</button>
+																</div>
+															</div>
+														<?php }
+													}
+												}
+												elseif ($yearN == $dateEventYearBegin && $yearN < $dateEventYearEnd) {
+													if ($monthN > $dateEventMonthBegin) { ?>
 														<div class="container-fluid">
 															<div class="row">
 																<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
@@ -367,6 +361,36 @@
 															</div>
 														</div>
 													<?php }
+													elseif ($monthN == $dateEventMonthBegin) {
+														if ($day >= $dateEventDayBegin) { ?>
+															<div class="container-fluid">
+																<div class="row">
+																	<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
+																	</button>
+																</div>
+															</div>
+														<?php }
+													}
+												}
+												elseif ($yearN == $dateEventYearEnd && $yearN > $dateEventYearBegin) {
+													if ($monthN < $dateEventMonthEnd) { ?>
+														<div class="container-fluid">
+															<div class="row">
+																<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
+																</button>
+															</div>
+														</div>
+													<?php }
+													elseif ($monthN == $dateEventMonthEnd) {
+														if ($day <= $dateEventDayEnd) { ?>
+															<div class="container-fluid">
+																<div class="row">
+																	<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
+																	</button>
+																</div>
+															</div>
+														<?php }
+													}
 												}
 											}
 										}
