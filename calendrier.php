@@ -23,10 +23,10 @@
 	<body>
 		<?php
 			//initialise les jours et les mois
-			// create array with days and months (in french)
+			// create array with days and months
 			$base = array();
-			$base['months'] = array(1 => 'Janvier', 2 => 'Février', 3 => 'Mars', 4 => 'Avril', 5 => 'Mai', 6 => 'Juin', 7 => 'Juillet', 8 => 'Aout', 9 => 	'	Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Decembre');
-			$base['days'] = array(1 => 'Lu', 2 => 'Ma', 3 => 'Me', 4 => 'Je', 5 => 'Ve', 6 => 'Sa', 7 => 'Di');
+			$base['months'] = array(1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April', 5 => 'May', 6 => 'June', 7 => 'Jully', 8 => 'August', 9 => 	'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Decembre');
+			$base['days'] = array(1 => 'Mo', 2 => 'Tu', 3 => 'We', 4 => 'Th', 5 => 'Fr', 6 => 'Sa', 7 => 'Su');
 
 			//initialise quelques évenements
 			// create somes events
@@ -48,28 +48,20 @@
 			
 			//récupération du mois et de l'année envoyés en POST
 			// take months and years send in POST
-			if (isset($_POST['year'])) {
-				$yearN = $_POST['year'];
-			}
-			else {
-				$yearN = $yearNow;
-			}
+			$yearN = (isset($_POST['year']))?$_POST['year']:$yearNow;
 			if (isset($_POST['month'])) {
 				if ($_POST['month'] < 1) {
 					$_POST['month'] = 12;
-					$yearN = $yearN - 1;
+					$yearN -= 1;
 					$_POST['year'] = $yearN;
 				}
 				if ($_POST['month'] > 12) {
 					$_POST['month'] = 1;
-					$yearN = $yearN + 1;
+					$yearN += 1;
 					$_POST['year'] = $yearN;
 				}
-				$monthN = $_POST['month'];
 			}
-			else {
-				$monthN = $monthNow;
-			}
+			$monthN = (isset($_POST['month']))?$_POST['month']:$monthNow;
 			
 			//nombre de jours dans le mois et numero du premier jour du mois
 			// take days in one month and first day of the month
@@ -77,27 +69,15 @@
 			$firstDay = date("w", mktime(0,0,0,$monthN,1,$yearN));
 			//ajustement du jour (si =0 (dimanche), alors =7)
 			// set first day (if =0 (sunday), then =7)
-			if ($firstDay == 0) {
-				$firstDay = 7;
-			}
+			$firstDay = ($firstDay == 0)?7:$firstDay;
 			
 			//nbr de jours du moi d'avant
 			// days of the previous month
-			if ($monthN - 1 < 1) {
-				$m = 12;
-			}
-			else {
-				$m = $monthN - 1;
-			}
+			$m = ($monthN - 1 < 1)?12:$monthN - 1;
 			$preDays = date("t", mktime(0,0,0,$m,1,$yearN));
 			//nbr de jours du mois d'apres
 			// days of the month after
-			if ($monthN + 1 > 12) {
-				$m = 1;
-			}
-			else {
-				$m = $monthN + 1;
-			}
+			$m = ($monthN + 1 > 12)?1:$monthN + 1;
 			$aftMonth = date("t", mktime(0,0,0,$m,1,$yearN));
 			
 			$tab_cal = array(array(),array(),array(),array(),array(),array(),array());
@@ -143,27 +123,16 @@
 					<select class="form-control" name="year" id="year">
 						<?php for ($i=0; $i < (($intervalYear) * 2 + 1); $i++) {
 							$year = $yearNow - $intervalYear + $i;
-							if ($year == $yearN) {
-							 	$default = 'selected';
-							}
-							else {
-								$default = '';
-							} ?>
-							<option value='<?=$year?>' <?=$default?>><?=$year?></option>
+						?>
+							<option value='<?=$year?>' <?=$default = ($year == $yearN)?'selected':'';?>><?=$year?></option>
 						<?php } ?>
 					</select>
 				</div>
 				<div class="form-group">
 					<label for="month">Mois :</label>
 					<select class="form-control" name="month" id="month">
-						<?php foreach ($base['months'] as $key => $month) {
-							if ($key == $monthN) {
-							 	$default = 'selected';
-							}
-							else {
-								$default = '';
-							} ?>
-							<option value='<?=$key?>' <?=$default?>><?=$month?></option>
+						<?php foreach ($base['months'] as $key => $month) { ?>
+							<option value='<?=$key?>' <?=($key == $monthN)?'selected':'';?>><?=$month?></option>
 						<?php } ?>
 					</select>
 				</div>
@@ -222,7 +191,7 @@
 								<?php } else { ?>
 									<form action="" method="POST" class="visible-lg-inline pull-left">
 										<?php if (isset($_POST['year'])): ?>
-											<input name="year" type="hidden" value="<?=$_POST['year']?>" id="">
+											<input name="year" type="hidden" value="<?=$yearN?>" id="">
 										<?php endif ?>
 										<button name="month" value="<?=$monthN-1?>" type="submit" class="btn btn-primary btn-xs">
 											<span class="glyphicon glyphicon-backward"></span>
@@ -237,7 +206,7 @@
 								<?php } else { ?>
 									<form action="" method="POST" class="visible-lg-inline pull-right">
 										<?php if (isset($_POST['year'])): ?>
-											<input name="year" type="hidden" value="<?=$_POST['year']?>" id="">
+											<input name="year" type="hidden" value="<?=$yearN?>" id="">
 										<?php endif ?>
 										<button name="month" value="<?=$monthN+1?>" type="submit" class="btn btn-primary btn-xs">
 											<span class="glyphicon glyphicon-forward"></span>
@@ -429,9 +398,9 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 		<script type="text/javascript">
-		$(function () {
-			$('[data-toggle="tooltip"]').tooltip()
-		})
+	  	$(function () {
+		  	$('[data-toggle="tooltip"]').tooltip()
+	    })
 		</script>
 	</body>
 </html>
