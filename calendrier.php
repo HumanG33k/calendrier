@@ -31,12 +31,12 @@
 			//initialise quelques évenements
 			// create somes events
 			$events = array();
-			$events[0] = array('date_begin' => '2014-11-06', 'date_end' => '2016-04-01', 'event' => 'studies', 'important' => 'hight');
-			$events[1] = array('date_begin' => '2015-07-24', 'date_end' => '2015-07-24', 'event' => 'personal', 'important' => 'medium');
-			$events[2] = array('date_begin' => '2015-07-24', 'date_end' => '2015-07-24', 'event' => 'personal', 'important' => 'hight');
-			$events[3] = array('date_begin' => '2015-07-24', 'date_end' => '2015-07-24', 'event' => 'truc', 'important' => 'low');
-			$events[4] = array('date_begin' => '2015-06-06', 'date_end' => '2015-11-07', 'event' => 'travel', 'important' => 'low');
-			$events[5] = array('date_begin' => '2015-07-05', 'date_end' => '2015-07-09', 'event' => 'La j\'ai vraiment pas d\'idée', 'important' => 'medium');
+			$events[0] = array('date_begin' => date('Y-m-d', strtotime('-2 year')), 'date_end' => date('Y-m-d', strtotime('+1 year')), 'event' => 'studies', 'important' => 'hight');
+			$events[1] = array('date_begin' => date("Y-m-d"), 'date_end' => date("Y-m-d"), 'event' => 'personal', 'interview' => 'medium');
+			$events[2] = array('date_begin' => date("Y-m-d"), 'date_end' => date("Y-m-d"), 'event' => 'personal', 'work appointment' => 'hight');
+			$events[3] = array('date_begin' => date("Y-m-d", strtotime('+3 day')), 'date_end' => date("Y-m-d", strtotime('+3 day')), 'event' => 'personal appointment', 'important' => 'low');
+			$events[4] = array('date_begin' => date('Y-m-d', strtotime('-37 day')), 'date_end' => date('Y-m-d', strtotime('-4 day')), 'event' => 'travel', 'important' => 'low');
+			$events[5] = array('date_begin' => date('Y-m-d', strtotime('-3 day')), 'date_end' => date('Y-m-d', strtotime('+3 day')), 'event' => 'Work on big project', 'important' => 'medium');
 
 			$intervalYear = 3;
 
