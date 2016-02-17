@@ -22,12 +22,6 @@
 	</head>
 	<body>
 		<?php
-			//initialise les jours et les mois
-			// create array with days and months
-			$base = array();
-			$base['months'] = array(1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April', 5 => 'May', 6 => 'June', 7 => 'Jully', 8 => 'August', 9 => 	'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Decembre');
-			$base['days'] = array(1 => 'Mo', 2 => 'Tu', 3 => 'We', 4 => 'Th', 5 => 'Fr', 6 => 'Sa', 7 => 'Su');
-
 			//initialise quelques évenements
 			// create somes events
 			$events = array();
@@ -124,15 +118,15 @@
 						<?php for ($i=0; $i < (($intervalYear) * 2 + 1); $i++) {
 							$year = $yearNow - $intervalYear + $i;
 						?>
-							<option value='<?=$year?>' <?=$default = ($year == $yearN)?'selected':'';?>><?=$year?></option>
+							<option value='<?=$year?>' <?=($year == $yearN)?'selected':'';?>><?=$year?></option>
 						<?php } ?>
 					</select>
 				</div>
 				<div class="form-group">
 					<label for="month">Mois :</label>
 					<select class="form-control" name="month" id="month">
-						<?php foreach ($base['months'] as $key => $month) { ?>
-							<option value='<?=$key?>' <?=($key == $monthN)?'selected':'';?>><?=$month?></option>
+					  <?php for ($i = 1; $i < 13; $i++) { ?>
+							<option value='<?=$i?>' <?=($i == $monthN)?'selected':'';?>><?=utf8_encode(ucwords(date("F", mktime(1, 1, 1, $i, 1, $yearN))))?></option>
 						<?php } ?>
 					</select>
 				</div>
@@ -146,84 +140,47 @@
 					<tr>
 						<th colspan="7">
 							<h2>
-								<!-- Si l'utilisateur cherche à voir plus loin que trois ans en arrière, désactive le bouton -->
-								<?php if ($yearN <= $yearNow - $intervalYear) { ?>
-									<button class="btn btn-primary btn-sm pull-left" role="button" disabled="disabled" href="#">
+								<form action="" method="POST" class="visible-lg-inline pull-left">
+									<input name="month" type="hidden" value="<?=$monthN?>">
+									<button name="year" value="<?=$yearN-1?>" type="submit" class="btn btn-primary btn-sm" <?=($yearN <= $yearNow - $intervalYear)?'disabled':'';?>>
 										<span class="glyphicon glyphicon-backward"></span>
 									</button>
-								<?php } else { ?>
-									<form action="" method="POST" class="visible-lg-inline pull-left">
-										<?php if (isset($_POST['month'])): ?>
-											<input name="month" type="hidden" value="<?=$_POST['month']?>" id="">
-										<?php endif ?>
-										<button name="year" value="<?=$yearN-1?>" type="submit" class="btn btn-primary btn-sm">
-											<span class="glyphicon glyphicon-backward"></span>
-										</button>
-									</form>
-								<?php } ?>
-								<!--  -->
+								</form>
 								<?=$yearN?>
-								<!-- Si l'utilisateur cherche à voir plus loin que trois ans en avant, désactive le bouton -->
-								<?php if ($yearN >= $yearNow + $intervalYear) { ?>
-									<button class="btn btn-primary btn-sm pull-right" role="button" disabled="disabled">
+								<form action="" method="POST" class="visible-lg-inline pull-right">
+									<input name="month" type="hidden" value="<?=$monthN?>">
+									<button name="year" value="<?=$yearN+1?>" type="submit" class="btn btn-primary btn-sm" <?=($yearN >= $yearNow + $intervalYear)?'disabled':'';?>>
 										<span class="glyphicon glyphicon-forward"></span>
 									</button>
-								<?php } else { ?>
-									<form action="" method="POST" class="visible-lg-inline pull-right">
-										<?php if (isset($_POST['month'])): ?>
-											<input name="month" type="hidden" value="<?=$_POST['month']?>" id="">
-										<?php endif ?>
-										<button name="year" value="<?=$yearN+1?>" type="submit" class="btn btn-primary btn-sm">
-											<span class="glyphicon glyphicon-forward"></span>
-										</button>
-									</form>
-								<?php } ?>
+								</form>
 							</h2>
 						</th>
 					</tr>
 					<tr>
 						<th colspan="7">
 							<h3>
-								<?php if ($yearN <= $yearNow - 3 && $monthN == 1) { ?>
-									<button class="btn btn-primary btn-xs pull-left" role="button" disabled="disabled" href="#">
+								<form action="" method="POST" class="visible-lg-inline pull-left">
+									<input name="month" type="hidden" value="<?=$yearN?>">
+									<button name="month" value="<?=$monthN-1?>" type="submit" class="btn btn-primary btn-xs" <?=($yearN <= $yearNow - 3 && $monthN == 1)?'disabled':'';?>>
 										<span class="glyphicon glyphicon-backward"></span>
 									</button>
-								<?php } else { ?>
-									<form action="" method="POST" class="visible-lg-inline pull-left">
-										<?php if (isset($_POST['year'])): ?>
-											<input name="year" type="hidden" value="<?=$yearN?>" id="">
-										<?php endif ?>
-										<button name="month" value="<?=$monthN-1?>" type="submit" class="btn btn-primary btn-xs">
-											<span class="glyphicon glyphicon-backward"></span>
-										</button>
-									</form>
-								<?php } ?>
-								<?=$base['months'][$monthN]?>
-								<?php if ($yearN >= $yearNow + 3 && $monthN == 12) { ?>
-									<button class="btn btn-primary btn-xs pull-right" role="button" disabled="disabled">
+								</form>
+								<?=utf8_encode(ucwords(date("F", mktime(1, 1, 1, $monthN, 1, $yearN))))?>
+								<form action="" method="POST" class="visible-lg-inline pull-right">
+									<input name="month" type="hidden" value="<?=$yearN?>">
+									<button name="month" value="<?=$monthN+1?>" type="submit" class="btn btn-primary btn-xs" <?=($yearN >= $yearNow + 3 && $monthN == 12)?'disabled':'';?>>
 										<span class="glyphicon glyphicon-forward"></span>
 									</button>
-								<?php } else { ?>
-									<form action="" method="POST" class="visible-lg-inline pull-right">
-										<?php if (isset($_POST['year'])): ?>
-											<input name="year" type="hidden" value="<?=$yearN?>" id="">
-										<?php endif ?>
-										<button name="month" value="<?=$monthN+1?>" type="submit" class="btn btn-primary btn-xs">
-											<span class="glyphicon glyphicon-forward"></span>
-										</button>
-									</form>
-								<?php } ?>
+								</form>
 							</h3>
 						</th>
 					</tr>
 					<tr>
-						<?php
-							foreach ($base['days'] as $d => $day) { ?>
+					  <?php for ($i = 1; $i < 8; $i++) { ?>
 								<th>
-									<?=$day?>
+									<?=utf8_encode(ucwords(date("D", mktime(1, 1, 1, 5, $i, 2000))))?>
 								</th>
-							<?php }
-						?>
+						<?php } ?>
 					</tr>
 					<?php
 						for($i=1; $i<7; $i++) { ?>
@@ -262,7 +219,7 @@
 												<?php if (new DateTime($e['date_begin']) <= new DateTime($yearN.'-'.$monthN.'-'.$day) && new DateTime($e['date_end']) >= new DateTime($yearN.'-'.$monthN.'-'.$day)) { ?>
 												  <div class="container-fluid">
 													  <div class="row">
-															<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> du <?=$e['date_begin']?> au <?=$e['date_end']?>">
+															<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> : <?=$e['date_begin']?> -> <?=$e['date_end']?>">
 															</button>
 													  </div>
 												  </div>
