@@ -22,6 +22,10 @@
 	</head>
 	<body>
 		<?php
+			//initialise la zone horaire
+			// init the local time zone
+		  setlocale(LC_TIME, 'fr_FR.utf8', 'fr_FR');
+
 			//initialise quelques évenements
 			// create somes events
 			$events = array();
@@ -126,7 +130,7 @@
 					<label for="month">Mois :</label>
 					<select class="form-control" name="month" id="month">
 					  <?php for ($i = 1; $i < 13; $i++) { ?>
-							<option value='<?=$i?>' <?=($i == $monthN)?'selected':'';?>><?=utf8_encode(ucwords(date("F", mktime(1, 1, 1, $i, 1, $yearN))))?></option>
+							<option value='<?=$i?>' <?=($i == $monthN)?'selected':'';?>><?=ucwords(strftime("%B", mktime(1, 1, 1, $i, 1, $yearN)))?></option>
 						<?php } ?>
 					</select>
 				</div>
@@ -165,7 +169,7 @@
 										<span class="glyphicon glyphicon-backward"></span>
 									</button>
 								</form>
-								<?=utf8_encode(ucwords(date("F", mktime(1, 1, 1, $monthN, 1, $yearN))))?>
+								<?=ucwords(strftime("%B", mktime(1, 1, 1, $monthN, 1, $yearN)))?>
 								<form action="" method="POST" class="visible-lg-inline pull-right">
 									<input name="month" type="hidden" value="<?=$yearN?>">
 									<button name="month" value="<?=$monthN+1?>" type="submit" class="btn btn-primary btn-xs" <?=($yearN >= $yearNow + 3 && $monthN == 12)?'disabled':'';?>>
@@ -178,7 +182,7 @@
 					<tr>
 					  <?php for ($i = 1; $i < 8; $i++) { ?>
 								<th>
-									<?=utf8_encode(ucwords(date("D", mktime(1, 1, 1, 5, $i, 2000))))?>
+									<?=ucwords(strftime("%a", mktime(1, 1, 1, 5, $i, 2000)))?>
 								</th>
 						<?php } ?>
 					</tr>
