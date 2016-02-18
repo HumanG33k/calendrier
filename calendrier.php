@@ -1,289 +1,337 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<title>Calendrier</title>
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-		<style type="text/css">
-			.table > tbody > tr > th {
-				text-align:center;
-			}
-			.table > tbody > tr > td.size {
-				width: 14.28571428571429%
-			}
-			.table > tbody > tr > td > h4 {
-				text-align:right;
-			}
-			.container-fluid .row button {
-				margin-bottom: 2px;
-			}
-		</style>
-	</head>
-	<body>
-		<?php
-			//initialise la zone horaire
-			// init the local time zone
-		  setlocale(LC_TIME, 'fr_FR.utf8', 'fr_FR');
-		  
-		  /**
-		   * Events object
-		   */
-		  class Event
-		  {
-		    public $date_begin;
-		    public $date_end;
-		    public $description;
-		    public $rank;
-		    /**
-		     * date format : "yyyy-mm-dd"
-		     */
-		    public function __construct($dateBegin, $dateEnd, $descriptionText, $rankNumber)
-		    {
-		      $this->date_begin = new DateTime($dateBegin);
-		      $this->date_end = (!empty($dateEnd))?new DateTime($dateEnd):new DateTime($dateBegin);
-		      $this->description = (is_string($descriptionText))?$descriptionText:'';
-		      switch ($rankNumber) {
-		        case 1:
-		          $this->rank = array('important'=>'low', 'color'=>'success');
-		          break;
-		          
-		        case 2:
-		          $this->rank = array('important'=>'medium', 'color'=>'warning');
-		          break;
-		        
-		        case 3:
-		        default:
-		          $this->rank = array('important'=>'hight', 'color'=>'danger');
-		          break;
-		      }
-		    }
-		  }
+  <head>
+    <meta charset="UTF-8">
+    <title>Calendrier</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <style type="text/css">
+      .table > tbody > tr > th {
+        text-align:center;
+      }
+      .table > tbody > tr > td.size {
+        width: 14.28571428571429%
+      }
+      .table > tbody > tr > td > h4 {
+        text-align:right;
+      }
+      .container-fluid .row button {
+        margin-bottom: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <?php
+      //initialise la zone horaire
+      // init the local time zone
+      setlocale(LC_TIME, 'fr_FR.utf8', 'fr_FR');
 
-			//initialise quelques évenements
-			// create somes events
-			$events[0] = new Event(date('Y-m-d', strtotime('-2 year')), date('Y-m-d', strtotime('+1 year')), 'studies', 3);
-			$events[1] = new Event(date('Y-m-d'), '', 'personal interview', 2);
-			$events[2] = new Event(date('Y-m-d'), '', 'work appointment', 3);
-			$events[3] = new Event(date('Y-m-d', strtotime('+3 day')), '', 'personal appointment', 1);
-			$events[4] = new Event(date('Y-m-d', strtotime('-37 day')), date('Y-m-d', strtotime('-4 day')), 'travel', 1);
-			$events[5] = new Event(date('Y-m-d', strtotime('-3 day')), date('Y-m-d', strtotime('+2 day')), 'Work on project', 2);
-			$events[6] = new Event(date('Y-m-d'), '', 'personal', 1);
-			$events[7] = new Event(date('Y-m-d', strtotime('+1 day')), date('Y-m-d', strtotime('+8 day')), 'Whatever...', 2);
+      /**
+       * Events object
+       */
+      class Event
+      {
+        public $date_begin;
+        public $date_end;
+        public $description;
+        public $rank;
+        /**
+         * date format : "yyyy-mm-dd"
+         */
+        public function __construct($dateBegin, $dateEnd, $descriptionText, $rankNumber)
+        {
+          $this->date_begin = new DateTime($dateBegin);
+          $this->date_end = (!empty($dateEnd))?new DateTime($dateEnd):new DateTime($dateBegin);
+          $this->description = (is_string($descriptionText))?$descriptionText:'';
+          switch ($rankNumber) {
+            case 1:
+              $this->rank = array('important'=>'low', 'color'=>'success');
+              break;
+
+            case 2:
+              $this->rank = array('important'=>'medium', 'color'=>'warning');
+              break;
+
+            case 3:
+            default:
+              $this->rank = array('important'=>'hight', 'color'=>'danger');
+              break;
+          }
+        }
+      }
+
+      //initialise quelques évenements
+      // create somes events
+      $events[0] = new Event(date('Y-m-d', strtotime('-37 day')), date('Y-m-d', strtotime('-4 day')), 'travel', 1);
+      $events[1] = new Event(date('Y-m-d'), '', 'personal interview', 2);
+      $events[2] = new Event(date('Y-m-d'), '', 'work appointment', 3);
+      $events[3] = new Event(date('Y-m-d', strtotime('+3 day')), '', 'personal appointment', 1);
+      $events[4] = new Event(date('Y-m-d', strtotime('-2 year')), date('Y-m-d', strtotime('+5 day')), 'studies', 3);
+      $events[5] = new Event(date('Y-m-d', strtotime('-4 day')), date('Y-m-d', strtotime('+2 day')), 'Work on project', 2);
+      $events[6] = new Event(date('Y-m-d'), '', 'personal', 1);
+      $events[7] = new Event(date('Y-m-d', strtotime('+1 day')), date('Y-m-d', strtotime('+6 day')), 'Whatever...', 2);
+
+      //Tri des evenements par durée
+      // Order of the events by duration
+      function sortByDuration($a, $b) {
+        $aDuration = $a->date_begin->diff($a->date_end);
+        $bDuration = $b->date_begin->diff($b->date_end);
+        if ( intval($aDuration->format('%R%a')) == intval($bDuration->format('%R%a')) ) { return 0; }
+        return ( intval($aDuration->format('%R%a')) > intval($bDuration->format('%R%a')) )?-1:1;
+      }
+      usort($events, "sortByDuration");
 
       //intervale d'années visibles pour l'utilisateurs {maintenant - intervale ; [...à...] ; maintenant + intervale}
       // interval of years that user can see {now - interval ; [...to...] ; now + interval}
-			$intervalYear = 3;
+      $intervalYear = 3;
 
-			//récupère les dates actuelles
-			// catch actualy dates
-			$dayNow = date("j");
-			$monthNow = date("n");
-			$yearNow = date("Y");
-			
-			//récupération du mois et de l'année envoyés en POST
-			// take months and years send in POST
-			$yearN = (isset($_POST['year']))?$_POST['year']:$yearNow;
-			if (isset($_POST['month'])) {
-				if ($_POST['month'] < 1) {
-					$_POST['month'] = 12;
-					$yearN -= 1;
-					$_POST['year'] = $yearN;
-				}
-				if ($_POST['month'] > 12) {
-					$_POST['month'] = 1;
-					$yearN += 1;
-					$_POST['year'] = $yearN;
-				}
-			}
-			$monthN = (isset($_POST['month']))?$_POST['month']:$monthNow;
-			
-			//nombre de jours dans le mois et numero du premier jour du mois
-			// take days in one month and first day of the month
-			$nbrDayInMonth = date("t", mktime(0,0,0,$monthN,1,$yearN));
-			$firstDay = date("w", mktime(0,0,0,$monthN,1,$yearN));
-			//ajustement du jour (si =0 (dimanche), alors =7)
-			// set first day (if =0 (sunday), then =7)
-			$firstDay = ($firstDay == 0)?7:$firstDay;
-			
-			//nbr de jours du moi d'avant
-			// days of the previous month
-			$m = ($monthN - 1 < 1)?12:$monthN - 1;
-			$preDays = date("t", mktime(0,0,0,$m,1,$yearN));
-			//nbr de jours du mois d'apres
-			// days of the month after
-			$m = ($monthN + 1 > 12)?1:$monthN + 1;
-			$aftMonth = date("t", mktime(0,0,0,$m,1,$yearN));
+      //récupère les dates actuelles
+      // catch actualy dates
+      $dayNow = date("j");
+      $monthNow = date("n");
+      $yearNow = date("Y");
 
-			$t = 1;
-			$style = "";
-			for($i=1; $i<7; $i++) {
-				for($j=1; $j<8; $j++) {
-					//on met les jours du mois précédent
-					// we set days of previous month
-					if ($t == 1 && $j < $firstDay) {
-						$style = "color:#aaa;";
-						$day = $preDays-($firstDay-($j))+1;
-						$tab_cal[$i][$j] = "<div style='{$style}'>{$day}</div>";
-					}
-					//on met le premier jour du mois à afficher
-					// we set the first day of the month to print
-					elseif ($j == $firstDay && $t == 1) {
-						$style = "color:#000;";
-						$tab_cal[$i][$j] = "<div style='{$style}'>{$t}</div>";
-						$t++;
-					}
-					//on met le premier jour du mois d'après
-					// we set the first day of the next month
-					elseif ($t > $nbrDayInMonth) {
-						$style = "color:#aaa;";
-						$tab_cal[$i][$j] = "<div style='{$style}'>1</div>";
-						$t = 2;
-					}
-					//on met les jours suivants du mois à afficher et du mois suivant
-					// we set nexts days os the month to print and the next month
-					elseif ($t > 1 && $t <= $nbrDayInMonth) {
-						$tab_cal[$i][$j] = "<div style='{$style}'>{$t}</div>";
-						$t++;
-					}
-				}
-			}
-		?>
-		
-		<div class="container">
-			<form method="POST" class="form-inline" action="" id="search_year">
-				<div class="form-group">
-					<label for="year">Année :</label>
-					<select class="form-control" name="year" id="year">
-						<?php for ($i=0; $i < (($intervalYear) * 2 + 1); $i++) {
-							$year = $yearNow - $intervalYear + $i;
-						?>
-							<option value='<?=$year?>' <?=($year == $yearN)?'selected':'';?>><?=$year?></option>
-						<?php } ?>
-					</select>
-				</div>
-				<div class="form-group">
-					<label for="month">Mois :</label>
-					<select class="form-control" name="month" id="month">
-					  <?php for ($i = 1; $i < 13; $i++) { ?>
-							<option value='<?=$i?>' <?=($i == $monthN)?'selected':'';?>><?=ucwords(strftime("%B", mktime(1, 1, 1, $i, 1, $yearN)))?></option>
-						<?php } ?>
-					</select>
-				</div>
-				<button type="submit" class="btn btn-default">Voir</button>
-			</form>
-			<!-- Tableau du calendrier -->
-			<div class="thumbnail">
-				<table class="table table-bordered">
-					<caption><h1><span class="glyphicon glyphicon-calendar"></span> Calendrier :</h1></caption>
-					<!-- Année -->
-					<tr>
-						<th colspan="7">
-							<h2>
-								<form action="" method="POST" class="visible-lg-inline pull-left">
-									<input name="month" type="hidden" value="<?=$monthN?>">
-									<button name="year" value="<?=$yearN-1?>" type="submit" class="btn btn-primary btn-sm" <?=($yearN <= $yearNow - $intervalYear)?'disabled':'';?>>
-										<span class="glyphicon glyphicon-backward"></span>
-									</button>
-								</form>
-								<?=$yearN?>
-								<form action="" method="POST" class="visible-lg-inline pull-right">
-									<input name="month" type="hidden" value="<?=$monthN?>">
-									<button name="year" value="<?=$yearN+1?>" type="submit" class="btn btn-primary btn-sm" <?=($yearN >= $yearNow + $intervalYear)?'disabled':'';?>>
-										<span class="glyphicon glyphicon-forward"></span>
-									</button>
-								</form>
-							</h2>
-						</th>
-					</tr>
-					<tr>
-						<th colspan="7">
-							<h3>
-								<form action="" method="POST" class="visible-lg-inline pull-left">
-									<input name="month" type="hidden" value="<?=$yearN?>">
-									<button name="month" value="<?=$monthN-1?>" type="submit" class="btn btn-primary btn-xs" <?=($yearN <= $yearNow - 3 && $monthN == 1)?'disabled':'';?>>
-										<span class="glyphicon glyphicon-backward"></span>
-									</button>
-								</form>
-								<?=ucwords(strftime("%B", mktime(1, 1, 1, $monthN, 1, $yearN)))?>
-								<form action="" method="POST" class="visible-lg-inline pull-right">
-									<input name="month" type="hidden" value="<?=$yearN?>">
-									<button name="month" value="<?=$monthN+1?>" type="submit" class="btn btn-primary btn-xs" <?=($yearN >= $yearNow + 3 && $monthN == 12)?'disabled':'';?>>
-										<span class="glyphicon glyphicon-forward"></span>
-									</button>
-								</form>
-							</h3>
-						</th>
-					</tr>
-					<tr>
-					  <?php for ($i = 1; $i < 8; $i++) { ?>
-								<th>
-									<?=ucwords(strftime("%a", mktime(1, 1, 1, 5, $i, 2000)))?>
-								</th>
-						<?php } ?>
-					</tr>
-					<?php
-						for($i=1; $i<7; $i++) { ?>
-							<tr>
-							<?php for($j=1; $j<8; $j++) {
-								//récupérer le jour dans la chaine de charactère retournée
-								// catch the day in the string return
-								preg_match_all('!\d+!', $tab_cal[$i][$j], $day);
-								if (isset($day[0][1])) {
-									$day = $day[0][1];
-								}
-								else {
-									$day = 0;
-								}
-								if ($monthN == $monthNow && $yearN == $yearNow && $day == $dayNow) {
-									$bground = 'info';
-								} else {
-									$bground = '';
-								}?>
-								<td  class="<?=$bground?> size">
-								  <h4>
-								    <?=$tab_cal[$i][$j]?>
-								  </h4>
-								  <?php foreach ($events as $e) {
-								    if ($e->date_begin != $e->date_end) {
-								      if ($day <> null) {
-								        if ($e->date_begin <= new DateTime($yearN.'-'.$monthN.'-'.$day) && $e->date_end >= new DateTime($yearN.'-'.$monthN.'-'.$day)) {
-								        ?>
-								          <div class="container-fluid">
-								            <div class="row">
-								              <button type="button" class="btn btn-<?=$e->rank['color']?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e->description?> : <?=$e->date_begin->format('Y-m-d')?> -> <?=$e->date_end->format('Y-m-d')?>">
-								              </button>
-								            </div>
-								          </div>
-								        <?php
-								        }
-								      }
-								    }
-								  }
-								  foreach ($events as $e) {
-								    if ($e->date_begin == $e->date_end) {
-								      if ($e->date_begin == new DateTime($yearN.'-'.$monthN.'-'.$day)) {
-								      ?>
-								        <button type="button" class="btn btn-<?=$e->rank['color']?> btn-sm" data-toggle="tooltip" data-placement="top" title="<?=$e->description?>">
-								        </button>
-								      <?php 
-								      }
-								    }
-								  } ?>
-								</td>
-							<?php } ?>
-							</tr>
-						<?php }
-					?>
-				</table>
-			</div> <!-- table -->
-		</div><!-- container -->
+      //récupération du mois et de l'année envoyés en POST
+      // take months and years send in POST
+      $yearN = (isset($_POST['year']))?$_POST['year']:$yearNow;
+      if (isset($_POST['month'])) {
+        if ($_POST['month'] < 1) {
+          $_POST['month'] = 12;
+          $yearN -= 1;
+          $_POST['year'] = $yearN;
+        }
+        if ($_POST['month'] > 12) {
+          $_POST['month'] = 1;
+          $yearN += 1;
+          $_POST['year'] = $yearN;
+        }
+      }
+      $monthN = (isset($_POST['month']))?$_POST['month']:$monthNow;
 
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-		<script type="text/javascript">
-	  	$(function () {
-		  	$('[data-toggle="tooltip"]').tooltip()
-	    })
-		</script>
-	</body>
+      //nombre de jours dans le mois et numero du premier jour du mois
+      // take days in one month and first day of the month
+      $nbrDayInMonth = date("t", mktime(0,0,0,$monthN,1,$yearN));
+      $firstDay = date("w", mktime(0,0,0,$monthN,1,$yearN));
+      //ajustement du jour (si =0 (dimanche), alors =7)
+      // set first day (if =0 (sunday), then =7)
+      $firstDay = ($firstDay == 0)?7:$firstDay;
+
+      //nbr de jours du moi d'avant
+      // days of the previous month
+      $m = ($monthN - 1 < 1)?12:$monthN - 1;
+      $preDays = date("t", mktime(0,0,0,$m,1,$yearN));
+
+      //nbr de jours du mois d'apres
+      // days of the month after
+      $m = ($monthN + 1 > 12)?1:$monthN + 1;
+      $aftMonth = date("t", mktime(0,0,0,$m,1,$yearN));
+
+      $t = 1;
+      $style = "";
+      for($i=1; $i<7; $i++) {
+        for($j=1; $j<8; $j++) {
+          //on met les jours du mois précédent
+          // we set days of previous month
+          if ($t == 1 && $j < $firstDay) {
+            $style = "color:#aaa;";
+            $day = $preDays-($firstDay-($j))+1;
+            $tab_cal[$i][$j] = "<div style='{$style}'>{$day}</div>";
+          }
+          //on met le premier jour du mois à afficher
+          // we set the first day of the month to print
+          elseif ($j == $firstDay && $t == 1) {
+            $style = "color:#000;";
+            $tab_cal[$i][$j] = "<div style='{$style}'>{$t}</div>";
+            $t++;
+          }
+          //on met le premier jour du mois d'après
+          // we set the first day of the next month
+          elseif ($t > $nbrDayInMonth) {
+            $style = "color:#aaa;";
+            $tab_cal[$i][$j] = "<div style='{$style}'>1</div>";
+            $t = 2;
+          }
+          //on met les jours suivants du mois à afficher et du mois suivant
+          // we set nexts days os the month to print and the next month
+          elseif ($t > 1 && $t <= $nbrDayInMonth) {
+            $tab_cal[$i][$j] = "<div style='{$style}'>{$t}</div>";
+            $t++;
+          }
+        }
+      }
+    ?>
+
+    <div class="container">
+      <form method="POST" class="form-inline" action="" id="search_year">
+        <div class="form-group">
+          <label for="year">Année :</label>
+          <select class="form-control" name="year" id="year">
+            <?php for ($i=0; $i < (($intervalYear) * 2 + 1); $i++) {
+              $year = $yearNow - $intervalYear + $i; ?>
+              <option value='<?=$year?>' <?=($year == $yearN)?'selected':'';?>><?=$year?></option>
+            <?php } ?>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="month">Mois :</label>
+          <select class="form-control" name="month" id="month">
+            <?php for ($i = 1; $i < 13; $i++) { ?>
+              <option value='<?=$i?>' <?=($i == $monthN)?'selected':'';?>><?=ucwords(strftime("%B", mktime(1, 1, 1, $i, 1, $yearN)))?></option>
+            <?php } ?>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-default">Voir</button>
+      </form>
+      <!-- Tableau du calendrier -->
+      <div class="thumbnail">
+        <table class="table table-bordered">
+          <caption><h1><span class="glyphicon glyphicon-calendar"></span> Calendrier :</h1></caption>
+          <!-- Année -->
+          <tr>
+            <th colspan="7">
+              <h2>
+                <form action="" method="POST" class="visible-lg-inline pull-left">
+                  <input name="month" type="hidden" value="<?=$monthN?>">
+                  <button name="year" value="<?=$yearN-1?>" type="submit" class="btn btn-primary btn-sm" <?=($yearN <= $yearNow - $intervalYear)?'disabled':'';?>>
+                    <span class="glyphicon glyphicon-backward"></span>
+                  </button>
+                </form>
+                <?=$yearN?>
+                <form action="" method="POST" class="visible-lg-inline pull-right">
+                  <input name="month" type="hidden" value="<?=$monthN?>">
+                  <button name="year" value="<?=$yearN+1?>" type="submit" class="btn btn-primary btn-sm" <?=($yearN >= $yearNow + $intervalYear)?'disabled':'';?>>
+                    <span class="glyphicon glyphicon-forward"></span>
+                  </button>
+                </form>
+              </h2>
+            </th>
+          </tr>
+          <tr>
+            <th colspan="7">
+              <h3>
+                <form action="" method="POST" class="visible-lg-inline pull-left">
+                  <input name="month" type="hidden" value="<?=$yearN?>">
+                  <button name="month" value="<?=$monthN-1?>" type="submit" class="btn btn-primary btn-xs" <?=($yearN <= $yearNow - 3 && $monthN == 1)?'disabled':'';?>>
+                    <span class="glyphicon glyphicon-backward"></span>
+                  </button>
+                </form>
+                <?=ucwords(strftime("%B", mktime(1, 1, 1, $monthN, 1, $yearN)))?>
+                <form action="" method="POST" class="visible-lg-inline pull-right">
+                  <input name="month" type="hidden" value="<?=$yearN?>">
+                  <button name="month" value="<?=$monthN+1?>" type="submit" class="btn btn-primary btn-xs" <?=($yearN >= $yearNow + 3 && $monthN == 12)?'disabled':'';?>>
+                    <span class="glyphicon glyphicon-forward"></span>
+                  </button>
+                </form>
+              </h3>
+            </th>
+          </tr>
+          <tr>
+            <?php for ($i = 1; $i < 8; $i++) { ?>
+                <th>
+                  <?=ucwords(strftime("%a", mktime(1, 1, 1, 5, $i, 2000)))?>
+                </th>
+            <?php } ?>
+          </tr>
+          <?php for($i=1; $i<7; $i++) { ?>
+            <tr>
+              <?php for($j=1; $j<8; $j++) {
+                //récupérer le jour dans la chaine de charactère retournée
+                // catch the day in the string return
+                preg_match_all('!\d+!', $tab_cal[$i][$j], $day);
+                $day = (isset($day[0][1]))?$day[0][1]:0;
+                $bground = ($monthN == $monthNow && $yearN == $yearNow && $day == $dayNow)?'info':''; ?>
+                <td  class="<?=$bground?> size">
+                  <h4>
+                    <?=$tab_cal[$i][$j]?>
+                  </h4>
+                  <?php foreach ($events as $id => $e) {
+                    if ($e->date_begin != $e->date_end) {
+                      if ($day <> null) {
+                        if ($e->date_begin <= new DateTime($yearN.'-'.$monthN.'-'.$day) && $e->date_end >= new DateTime($yearN.'-'.$monthN.'-'.$day)) { ?>
+                          <div class="container-fluid btn-<?=$id?>-parent">
+                            <div class="row">
+                              <button type="button" class="btn btn-<?=$e->rank['color']?> btn-sm btn-block btn-hover btn-<?=$id?>" data-toggle="tooltip" data-placement="top" title="<?=$e->description?> : <?=$e->date_begin->format('Y-m-d')?> -> <?=$e->date_end->format('Y-m-d')?>">
+                              </button>
+                            </div>
+                          </div>
+                        <?php }
+                      }
+                    }
+                  }
+                  foreach ($events as $e) {
+                    if ($e->date_begin == $e->date_end) {
+                      if ($e->date_begin == new DateTime($yearN.'-'.$monthN.'-'.$day)) { ?>
+                        <button type="button" class="btn btn-<?=$e->rank['color']?> btn-sm" data-toggle="tooltip" data-placement="top" title="<?=$e->description?>">
+                        </button>
+                      <?php }
+                    }
+                  } ?>
+                </td>
+              <?php } ?>
+            </tr>
+          <?php } ?>
+        </table>
+      </div> <!-- table -->
+    </div><!-- container -->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+      $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+      })
+      Array.prototype.inArray = function(element) { 
+        for(var i=0, limit = this.length; i < limit; i++) { 
+          if(this[i] == element) { return true; }
+        }
+        return false;
+      };
+      Array.prototype.pushIfNotExist = function(element) { 
+        if (!this.inArray(element)) {
+          this.push(element);
+        }
+      }; 
+
+      var btns = document.getElementsByClassName('btn-hover');
+      var allDays = [];
+      var allDaysParents = [];
+      for (var i = 0, limit = btns.length; i < limit; i++) {
+        var classes = btns[i].className.split(/\s/);
+        for (var j = 0, max = classes.length; j < max; j++) {
+          if (classes[j].search(/^btn\-[\d]+$/) > -1) {
+            allDays[i] = document.getElementsByClassName(classes[j]);
+            allDaysParents.pushIfNotExist(document.getElementsByClassName(classes[j]+'-parent'));
+          }
+        }
+        btns[i].addEventListener('mouseover', function(i){
+          return function(){
+            for (var j = 0, max = allDays.length; j < max; j++) {
+              allDays[i][j].className = allDays[i][j].className.replace(/\bbtn-(success|warning|danger)\b/, 'btn-primary $1');
+            }
+          }
+        }(i), false);
+        btns[i].addEventListener('mouseout', function(i){
+          return function(){
+            for (var j = 0, max = allDays.length; j < max; j++) {
+              allDays[i][j].className = allDays[i][j].className.replace(/\bbtn-primary (success|warning|danger)\b/, 'btn-$1');
+            }
+          }
+        }(i), false);
+      }
+      for (var i = 0, limit = allDaysParents.length; i < limit; i++) {
+        var moreDistant = 0;
+        var dist = 0;
+        for (var j = 0, max = allDaysParents[i].length; j < max; j++) {
+          dist = allDaysParents[i][j].getBoundingClientRect().top - allDaysParents[i][j].parentNode.getBoundingClientRect().top;
+          moreDistant = (dist > moreDistant)?dist:moreDistant;
+        }
+        for (var j = 0, max = allDaysParents[i].length; j < max; j++) {
+          dist = allDaysParents[i][j].getBoundingClientRect().top - allDaysParents[i][j].parentNode.getBoundingClientRect().top;
+          if (dist < moreDistant) {
+            var margin = moreDistant - dist;
+            allDaysParents[i][j].getElementsByClassName('btn-hover')[0].style.marginTop = margin + 'px';
+          }
+        }
+      }
+    </script>
+  </body>
 </html>
