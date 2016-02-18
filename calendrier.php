@@ -9,8 +9,7 @@
 				text-align:center;
 			}
 			.table > tbody > tr > td.size {
-				min-width: 14%;
-				max-width: 15%;
+				width: 14.28571428571429%
 			}
 			.table > tbody > tr > td > h4 {
 				text-align:right;
@@ -25,17 +24,54 @@
 			//initialise la zone horaire
 			// init the local time zone
 		  setlocale(LC_TIME, 'fr_FR.utf8', 'fr_FR');
+		  
+		  /**
+		   * Events object
+		   */
+		  class Event
+		  {
+		    public $date_begin;
+		    public $date_end;
+		    public $description;
+		    public $rank;
+		    /**
+		     * date format : "yyyy-mm-dd"
+		     */
+		    public function __construct($dateBegin, $dateEnd, $descriptionText, $rankNumber)
+		    {
+		      $this->date_begin = new DateTime($dateBegin);
+		      $this->date_end = (!empty($dateEnd))?new DateTime($dateEnd):new DateTime($dateBegin);
+		      $this->description = (is_string($descriptionText))?$descriptionText:'';
+		      switch ($rankNumber) {
+		        case 1:
+		          $this->rank = array('important'=>'low', 'color'=>'success');
+		          break;
+		          
+		        case 2:
+		          $this->rank = array('important'=>'medium', 'color'=>'warning');
+		          break;
+		        
+		        case 3:
+		        default:
+		          $this->rank = array('important'=>'hight', 'color'=>'danger');
+		          break;
+		      }
+		    }
+		  }
 
 			//initialise quelques évenements
 			// create somes events
-			$events = array();
-			$events[0] = array('date_begin' => date('Y-m-d', strtotime('-2 year')), 'date_end' => date('Y-m-d', strtotime('+1 year')), 'event' => 'studies', 'important' => 'hight');
-			$events[1] = array('date_begin' => date("Y-m-d"), 'date_end' => date("Y-m-d"), 'event' => 'personal', 'interview' => 'medium');
-			$events[2] = array('date_begin' => date("Y-m-d"), 'date_end' => date("Y-m-d"), 'event' => 'personal', 'work appointment' => 'hight');
-			$events[3] = array('date_begin' => date("Y-m-d", strtotime('+3 day')), 'date_end' => date("Y-m-d", strtotime('+3 day')), 'event' => 'personal appointment', 'important' => 'low');
-			$events[4] = array('date_begin' => date('Y-m-d', strtotime('-37 day')), 'date_end' => date('Y-m-d', strtotime('-4 day')), 'event' => 'travel', 'important' => 'low');
-			$events[5] = array('date_begin' => date('Y-m-d', strtotime('-3 day')), 'date_end' => date('Y-m-d', strtotime('+3 day')), 'event' => 'Work on big project', 'important' => 'medium');
+			$events[0] = new Event(date('Y-m-d', strtotime('-2 year')), date('Y-m-d', strtotime('+1 year')), 'studies', 3);
+			$events[1] = new Event(date('Y-m-d'), '', 'personal interview', 2);
+			$events[2] = new Event(date('Y-m-d'), '', 'work appointment', 3);
+			$events[3] = new Event(date('Y-m-d', strtotime('+3 day')), '', 'personal appointment', 1);
+			$events[4] = new Event(date('Y-m-d', strtotime('-37 day')), date('Y-m-d', strtotime('-4 day')), 'travel', 1);
+			$events[5] = new Event(date('Y-m-d', strtotime('-3 day')), date('Y-m-d', strtotime('+2 day')), 'Work on project', 2);
+			$events[6] = new Event(date('Y-m-d'), '', 'personal', 1);
+			$events[7] = new Event(date('Y-m-d', strtotime('+1 day')), date('Y-m-d', strtotime('+8 day')), 'Whatever...', 2);
 
+      //intervale d'années visibles pour l'utilisateurs {maintenant - intervale ; [...à...] ; maintenant + intervale}
+      // interval of years that user can see {now - interval ; [...to...] ; now + interval}
 			$intervalYear = 3;
 
 			//récupère les dates actuelles
@@ -77,8 +113,7 @@
 			// days of the month after
 			$m = ($monthN + 1 > 12)?1:$monthN + 1;
 			$aftMonth = date("t", mktime(0,0,0,$m,1,$yearN));
-			
-			$tab_cal = array(array(),array(),array(),array(),array(),array(),array());
+
 			$t = 1;
 			$style = "";
 			for($i=1; $i<7; $i++) {
@@ -205,47 +240,35 @@
 									$bground = '';
 								}?>
 								<td  class="<?=$bground?> size">
-									<h4>
-										<?=$tab_cal[$i][$j]?>
-									</h4>
-									<?php foreach ($events as $e) {
-										if ($e['date_begin'] != $e['date_end']) {
-											if ($day <> null) {
-												//change la couleur
-												// change color
-												if ($e['important'] == 'hight') {
-													$col = "danger";
-												} elseif ($e['important'] == 'medium') {
-													$col = "warning";
-												} elseif ($e['important'] == 'low') {
-													$col = "success";
-												} ?>
-												<?php if (new DateTime($e['date_begin']) <= new DateTime($yearN.'-'.$monthN.'-'.$day) && new DateTime($e['date_end']) >= new DateTime($yearN.'-'.$monthN.'-'.$day)) { ?>
-												  <div class="container-fluid">
-													  <div class="row">
-															<button type="button" class="btn btn-<?=$col?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?> : <?=$e['date_begin']?> -> <?=$e['date_end']?>">
-															</button>
-													  </div>
-												  </div>
-												<?php }?>
-											<?php }
-										}
-									}
-									foreach ($events as $e) {
-										if ($e['date_begin'] == $e['date_end']) {
-											if (new DateTime($e['date_begin']) == new DateTime($yearN.'-'.$monthN.'-'.$day)) {
-												if ($e['important'] == 'hight') {
-													$col = "danger";
-												} elseif ($e['important'] == 'medium') {
-													$col = "warning";
-												} elseif ($e['important'] == 'low') {
-													$col = "success";
-												} ?>
-												<button type="button" class="btn btn-<?=$col?> btn-sm" data-toggle="tooltip" data-placement="top" title="<?=$e['event']?>">
-												</button>
-											<?php }
-										}
-									} ?>
+								  <h4>
+								    <?=$tab_cal[$i][$j]?>
+								  </h4>
+								  <?php foreach ($events as $e) {
+								    if ($e->date_begin != $e->date_end) {
+								      if ($day <> null) {
+								        if ($e->date_begin <= new DateTime($yearN.'-'.$monthN.'-'.$day) && $e->date_end >= new DateTime($yearN.'-'.$monthN.'-'.$day)) {
+								        ?>
+								          <div class="container-fluid">
+								            <div class="row">
+								              <button type="button" class="btn btn-<?=$e->rank['color']?> btn-sm btn-block" data-toggle="tooltip" data-placement="top" title="<?=$e->description?> : <?=$e->date_begin->format('Y-m-d')?> -> <?=$e->date_end->format('Y-m-d')?>">
+								              </button>
+								            </div>
+								          </div>
+								        <?php
+								        }
+								      }
+								    }
+								  }
+								  foreach ($events as $e) {
+								    if ($e->date_begin == $e->date_end) {
+								      if ($e->date_begin == new DateTime($yearN.'-'.$monthN.'-'.$day)) {
+								      ?>
+								        <button type="button" class="btn btn-<?=$e->rank['color']?> btn-sm" data-toggle="tooltip" data-placement="top" title="<?=$e->description?>">
+								        </button>
+								      <?php 
+								      }
+								    }
+								  } ?>
 								</td>
 							<?php } ?>
 							</tr>
