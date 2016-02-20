@@ -24,6 +24,7 @@
       //initialise la zone horaire
       // init the local time zone
       setlocale(LC_TIME, 'fr_FR.utf8', 'fr_FR');
+      date_default_timezone_set('Europe/Paris');
 
       /**
        * Events object
@@ -66,9 +67,12 @@
       $events[2] = new Event(date('Y-m-d'), '', 'work appointment', 3);
       $events[3] = new Event(date('Y-m-d', strtotime('+3 day')), '', 'personal appointment', 1);
       $events[4] = new Event(date('Y-m-d', strtotime('-2 year')), date('Y-m-d', strtotime('+5 day')), 'studies', 3);
-      $events[5] = new Event(date('Y-m-d', strtotime('-4 day')), date('Y-m-d', strtotime('+2 day')), 'Work on project', 2);
+      $events[5] = new Event(date('Y-m-d', strtotime('-5 day')), date('Y-m-d', strtotime('+2 day')), 'Work on project', 2);
       $events[6] = new Event(date('Y-m-d'), '', 'personal', 1);
-      $events[7] = new Event(date('Y-m-d', strtotime('+1 day')), date('Y-m-d', strtotime('+6 day')), 'Whatever...', 2);
+      $events[7] = new Event(date('Y-m-d', strtotime('+1 day')), date('Y-m-d', strtotime('+7 day')), 'Whatever...', 2);
+      $events[8] = new Event(date('Y-m-d', strtotime('+3 day')), date('Y-m-d', strtotime('+57 day')), 'Just on more for the exemple', 1);
+      $events[9] = new Event(date('Y-m-d'), date('Y-m-d', strtotime('+6 day')), 'Just on more for the exemple', 3);
+      $events[10] = new Event(date('Y-m-d', strtotime('+4 day')), date('Y-m-d', strtotime('+7 day')), 'Just on more for the exemple', 1);
 
       //Tri des evenements par durée
       // Order of the events by duration
@@ -86,9 +90,9 @@
 
       //récupère les dates actuelles
       // catch actualy dates
-      $dayNow = date("j");
-      $monthNow = date("n");
-      $yearNow = date("Y");
+      $dayNow = strftime("%d");
+      $monthNow = strftime("%m");
+      $yearNow = strftime("%Y");
 
       //récupération du mois et de l'année envoyés en POST
       // take months and years send in POST
@@ -237,9 +241,8 @@
                 //récupérer le jour dans la chaine de charactère retournée
                 // catch the day in the string return
                 preg_match_all('!\d+!', $tab_cal[$i][$j], $day);
-                $day = (isset($day[0][1]))?$day[0][1]:0;
-                $bground = ($monthN == $monthNow && $yearN == $yearNow && $day == $dayNow)?'info':''; ?>
-                <td  class="<?=$bground?> size">
+                $day = (isset($day[0][1]))?$day[0][1]:0; ?>
+                <td  class="<?=($monthN == $monthNow && $yearN == $yearNow && $day == $dayNow)?'info':'';?> size" parent-day="day">
                   <h4>
                     <?=$tab_cal[$i][$j]?>
                   </h4>
@@ -256,8 +259,8 @@
                         <?php }
                       }
                     }
-                  }
-                  foreach ($events as $e) {
+                  }?>
+                  <?php foreach ($events as $e) {
                     if ($e->date_begin == $e->date_end) {
                       if ($e->date_begin == new DateTime($yearN.'-'.$monthN.'-'.$day)) { ?>
                         <button type="button" class="btn btn-<?=$e->rank['color']?> btn-sm" data-toggle="tooltip" data-placement="top" title="<?=$e->description?>">
@@ -277,7 +280,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script type="text/javascript">
       $(function () {
-      $('[data-toggle="tooltip"]').tooltip()
+        $('[data-toggle="tooltip"]').tooltip()
       })
       Array.prototype.inArray = function(element) { 
         for(var i=0, limit = this.length; i < limit; i++) { 
@@ -285,50 +288,68 @@
         }
         return false;
       };
-      Array.prototype.pushIfNotExist = function(element) { 
+      Array.prototype.pushIfNotExist = function(element) {
         if (!this.inArray(element)) {
           this.push(element);
         }
       }; 
-
+      HTMLElement.prototype.findParentWhereGetAttribute = function(attribute, attributeValue) {
+        var parent = this;
+        do {
+          parent = (parent.parentNode == document)?false:parent.parentNode;
+        } while (parent.parentNode.getAttribute(attribute) == attributeValue || parent.parentNode == document)
+        return parent;
+      }
       var btns = document.getElementsByClassName('btn-hover');
-      var allDays = [];
-      var allDaysParents = [];
+      var allDaysEvents = [];
+      var allEvents = [];
       for (var i = 0, limit = btns.length; i < limit; i++) {
         var classes = btns[i].className.split(/\s/);
         for (var j = 0, max = classes.length; j < max; j++) {
           if (classes[j].search(/^btn\-[\d]+$/) > -1) {
-            allDays[i] = document.getElementsByClassName(classes[j]);
-            allDaysParents.pushIfNotExist(document.getElementsByClassName(classes[j]+'-parent'));
+            allDaysEvents[i] = document.getElementsByClassName(classes[j]);
+            allEvents.pushIfNotExist(document.getElementsByClassName(classes[j]+'-parent'));
           }
         }
         btns[i].addEventListener('mouseover', function(i){
           return function(){
-            for (var j = 0, max = allDays.length; j < max; j++) {
-              allDays[i][j].className = allDays[i][j].className.replace(/\bbtn-(success|warning|danger)\b/, 'btn-primary $1');
+            for (var j = 0, max = allDaysEvents.length; j < max; j++) {
+              allDaysEvents[i][j].className = allDaysEvents[i][j].className.replace(/\bbtn-(success|warning|danger)\b/, 'btn-primary $1');
             }
           }
         }(i), false);
         btns[i].addEventListener('mouseout', function(i){
           return function(){
-            for (var j = 0, max = allDays.length; j < max; j++) {
-              allDays[i][j].className = allDays[i][j].className.replace(/\bbtn-primary (success|warning|danger)\b/, 'btn-$1');
+            for (var j = 0, max = allDaysEvents.length; j < max; j++) {
+              allDaysEvents[i][j].className = allDaysEvents[i][j].className.replace(/\bbtn-primary (success|warning|danger)\b/, 'btn-$1');
             }
           }
         }(i), false);
       }
-      for (var i = 0, limit = allDaysParents.length; i < limit; i++) {
-        var moreDistant = 0;
+      console.log(allEvents);
+      for (var i = 0, limit = allEvents.length; i < limit; i++) {
         var dist = 0;
-        for (var j = 0, max = allDaysParents[i].length; j < max; j++) {
-          dist = allDaysParents[i][j].getBoundingClientRect().top - allDaysParents[i][j].parentNode.getBoundingClientRect().top;
-          moreDistant = (dist > moreDistant)?dist:moreDistant;
+        var moreDistant = 0;
+        var topMargin = 0;
+        var minDistant = 0;
+        for (var j = 0, max = allEvents[i].length; j < max; j++) {
+          if (allEvents[i][j].findParentWhereGetAttribute('parent-day', 'day') != false) {
+            dist = allEvents[i][j].getBoundingClientRect().top - allEvents[i][j].findParentWhereGetAttribute('parent-day', 'day').getBoundingClientRect().top;
+            moreDistant = (dist > moreDistant)?dist:moreDistant;
+            if (dist < moreDistant) {
+              var margin = moreDistant - dist;
+              allEvents[i][j].getElementsByClassName('btn-hover')[0].style.marginTop = margin + 'px';
+            }
+          }
         }
-        for (var j = 0, max = allDaysParents[i].length; j < max; j++) {
-          dist = allDaysParents[i][j].getBoundingClientRect().top - allDaysParents[i][j].parentNode.getBoundingClientRect().top;
-          if (dist < moreDistant) {
-            var margin = moreDistant - dist;
-            allDaysParents[i][j].getElementsByClassName('btn-hover')[0].style.marginTop = margin + 'px';
+        for (var j = allEvents[i].length - 1, max = - 1; j > max; j--) {
+          if (allEvents[i][j].findParentWhereGetAttribute('parent-day', 'day') != false) {
+            dist = allEvents[i][j].getBoundingClientRect().top - allEvents[i][j].findParentWhereGetAttribute('parent-day', 'day').getBoundingClientRect().top;
+            moreDistant = (dist > moreDistant)?dist:moreDistant;
+            if (dist < moreDistant) {
+              var margin = moreDistant - dist;
+              allEvents[i][j].getElementsByClassName('btn-hover')[0].style.marginTop = margin + 'px';
+            }
           }
         }
       }
