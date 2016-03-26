@@ -133,11 +133,16 @@
       $unsetKeys = array();
       foreach ($events as $key => $e) {
         if (intval($e->date_begin->format('Y')) <= intval($yearN) && intval($e->date_end->format('Y')) >= intval($yearN)) {
-          if (intval($e->date_begin->format('m')) <= intval($monthN) && intval($e->date_end->format('m')) >= intval($monthN)) {
-            // echo $e->date_begin->format('Y-m-d') . ' ' . $e->date_end->format('Y-m-d') . ' ok : ' . ' ' . $e->description . '<br>';
-          } else {
+        if (intval($e->date_begin->format('Y')) == intval($yearN)) {
+          if (intval($e->date_begin->format('m')) > intval($monthN)) {
             $unsetKeys[] = $key;
           }
+        }
+        if (intval($e->date_end->format('Y')) == intval($yearN)) {
+          if (intval($e->date_end->format('m')) < intval($monthN)) {
+            $unsetKeys[] = $key;
+          }
+        }
         } else {
           $unsetKeys[] = $key;
         }
