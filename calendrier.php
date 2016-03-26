@@ -11,11 +11,14 @@
       .table > tbody > tr > td.size {
         width: 14.28571428571429%
       }
+      .table > tbody > tr > td .parent-row {
+        position: relative;
+      }
       .table > tbody > tr > td > h4 {
         text-align:right;
       }
       .container-fluid .row button {
-        margin-bottom: 2px;
+        position: absolute;
       }
     </style>
   </head>
@@ -31,15 +34,18 @@
        */
       class Event
       {
+        public $id;
         public $date_begin;
         public $date_end;
         public $description;
         public $rank;
+        public $duration;
         /**
          * date format : "yyyy-mm-dd"
          */
-        public function __construct($dateBegin, $dateEnd, $descriptionText, $rankNumber)
+        public function __construct($unId, $dateBegin, $dateEnd, $descriptionText, $rankNumber)
         {
+          $this->id = $unId;
           $this->date_begin = new DateTime($dateBegin);
           $this->date_end = (!empty($dateEnd))?new DateTime($dateEnd):new DateTime($dateBegin);
           $this->description = (is_string($descriptionText))?$descriptionText:'';
@@ -57,32 +63,25 @@
               $this->rank = array('important'=>'hight', 'color'=>'danger');
               break;
           }
+          $this->duration = $this->date_begin->diff($this->date_end)->days;
         }
       }
 
       //initialise quelques évenements
       // create somes events
-      $events[0] = new Event(date('Y-m-d', strtotime('-37 day')), date('Y-m-d', strtotime('-4 day')), 'travel', 1);
-      $events[1] = new Event(date('Y-m-d'), '', 'personal interview', 2);
-      $events[2] = new Event(date('Y-m-d'), '', 'work appointment', 3);
-      $events[3] = new Event(date('Y-m-d', strtotime('+3 day')), '', 'personal appointment', 1);
-      $events[4] = new Event(date('Y-m-d', strtotime('-2 year')), date('Y-m-d', strtotime('+5 day')), 'studies', 3);
-      $events[5] = new Event(date('Y-m-d', strtotime('-5 day')), date('Y-m-d', strtotime('+2 day')), 'Work on project', 2);
-      $events[6] = new Event(date('Y-m-d'), '', 'personal', 1);
-      $events[7] = new Event(date('Y-m-d', strtotime('+1 day')), date('Y-m-d', strtotime('+7 day')), 'Whatever...', 2);
-      $events[8] = new Event(date('Y-m-d', strtotime('+3 day')), date('Y-m-d', strtotime('+57 day')), 'Just on more for the exemple', 1);
-      $events[9] = new Event(date('Y-m-d'), date('Y-m-d', strtotime('+6 day')), 'Just on more for the exemple', 3);
-      $events[10] = new Event(date('Y-m-d', strtotime('+4 day')), date('Y-m-d', strtotime('+7 day')), 'Just on more for the exemple', 1);
-
-      //Tri des evenements par durée
-      // Order of the events by duration
-      function sortByDuration($a, $b) {
-        $aDuration = $a->date_begin->diff($a->date_end);
-        $bDuration = $b->date_begin->diff($b->date_end);
-        if ( intval($aDuration->format('%R%a')) == intval($bDuration->format('%R%a')) ) { return 0; }
-        return ( intval($aDuration->format('%R%a')) > intval($bDuration->format('%R%a')) )?-1:1;
-      }
-      usort($events, "sortByDuration");
+      $events[0] = new Event(1, date('Y-m-d', strtotime('-37 day')), date('Y-m-d', strtotime('-4 day')), 'travel', 1);
+      $events[1] = new Event(2, date('Y-m-d'), '', 'personal interview', 2);
+      $events[2] = new Event(3, date('Y-m-d'), '', 'work appointment', 3);
+      $events[3] = new Event(5, date('Y-m-d', strtotime('+3 day')), '', 'personal appointment', 1);
+      $events[4] = new Event(6, date('Y-m-d', strtotime('-2 year')), date('Y-m-d', strtotime('+5 day')), 'studies', 3);
+      $events[5] = new Event(4, date('Y-m-d', strtotime('-5 day')), date('Y-m-d', strtotime('+2 day')), 'Work on project', 2);
+      $events[6] = new Event(7, date('Y-m-d'), '', 'personal', 1);
+      $events[7] = new Event(9, date('Y-m-d', strtotime('+1 day')), date('Y-m-d', strtotime('+7 day')), 'Whatever...', 2);
+      $events[8] = new Event(8, date('Y-m-d', strtotime('+3 day')), date('Y-m-d', strtotime('+57 day')), 'Just on more for the exemple', 1);
+      $events[9] = new Event(10, date('Y-m-d'), date('Y-m-d', strtotime('+6 day')), 'Just on more for the exemple', 3);
+      $events[10] = new Event(11, date('Y-m-d', strtotime('+4 day')), date('Y-m-d', strtotime('+7 day')), 'Just on more for the exemple', 1);
+      $events[11] = new Event(12, date('Y-m-d', strtotime('+1 month')), date('Y-m-d', strtotime('+7 year')), 'no month', 1);
+      $events[12] = new Event(13, date('Y-m-d', strtotime('-9 year')), date('Y-m-d', strtotime('-1 year')), 'no year', 1);
 
       //intervale d'années visibles pour l'utilisateurs {maintenant - intervale ; [...à...] ; maintenant + intervale}
       // interval of years that user can see {now - interval ; [...to...] ; now + interval}
@@ -128,6 +127,34 @@
       // days of the month after
       $m = ($monthN + 1 > 12)?1:$monthN + 1;
       $aftMonth = date("t", mktime(0,0,0,$m,1,$yearN));
+
+      //ne récupère que les évennements du mois parcourus (essenciel pour l'affichage), à remplacer par un where > date dans la requête SQL
+      //set only the elements of the actual month (essential for the templating), can be replace with a where > date in the SQL request
+      $unsetKeys = array();
+      foreach ($events as $key => $e) {
+        if (intval($e->date_begin->format('Y')) <= intval($yearN) && intval($e->date_end->format('Y')) >= intval($yearN)) {
+          if (intval($e->date_begin->format('m')) <= intval($monthN) && intval($e->date_end->format('m')) >= intval($monthN)) {
+            // echo $e->date_begin->format('Y-m-d') . ' ' . $e->date_end->format('Y-m-d') . ' ok : ' . ' ' . $e->description . '<br>';
+          } else {
+            $unsetKeys[] = $key;
+          }
+        } else {
+          $unsetKeys[] = $key;
+        }
+      }
+      foreach ($unsetKeys as $unsetKey) {
+        unset($events[$unsetKey]);
+      }
+
+      //Tri des evenements par durée, remplecer par un order by duration en SQL
+      // Order of the events by duration, can be replace by a SQL order by duration
+      function sortByDuration($a, $b) {
+        $aDuration = $a->date_begin->diff($a->date_end);
+        $bDuration = $b->date_begin->diff($b->date_end);
+        if ( intval($aDuration->format('%R%a')) == intval($bDuration->format('%R%a')) ) { return 0; }
+        return ( intval($aDuration->format('%R%a')) > intval($bDuration->format('%R%a')) )?-1:1;
+      }
+      usort($events, "sortByDuration");
 
       $t = 1;
       $style = "";
@@ -242,17 +269,18 @@
                 // catch the day in the string return
                 preg_match_all('!\d+!', $tab_cal[$i][$j], $day);
                 $day = (isset($day[0][1]))?$day[0][1]:0; ?>
-                <td  class="<?=($monthN == $monthNow && $yearN == $yearNow && $day == $dayNow)?'info':'';?> size" parent-day="day">
+                <td  class="<?=($monthN == $monthNow && $yearN == $yearNow && $day == $dayNow)?'info':'';?> size">
                   <h4>
                     <?=$tab_cal[$i][$j]?>
                   </h4>
+                  <div class="parent-day" parent-day="day">
                   <?php foreach ($events as $id => $e) {
                     if ($e->date_begin != $e->date_end) {
                       if ($day <> null) {
                         if ($e->date_begin <= new DateTime($yearN.'-'.$monthN.'-'.$day) && $e->date_end >= new DateTime($yearN.'-'.$monthN.'-'.$day)) { ?>
                           <div class="container-fluid btn-<?=$id?>-parent">
-                            <div class="row">
-                              <button type="button" class="btn btn-<?=$e->rank['color']?> btn-sm btn-block btn-hover btn-<?=$id?>" data-toggle="tooltip" data-placement="top" title="<?=$e->description?> : <?=$e->date_begin->format('Y-m-d')?> -> <?=$e->date_end->format('Y-m-d')?>">
+                            <div class="row parent-row">
+                              <button type="button" event-in-month="<?=$id?>" class="btn btn-<?=$e->rank['color']?> btn-sm btn-block btn-hover btn-<?=$id?>" data-toggle="tooltip" data-placement="top" title="<?=$e->description?> : <?=$e->date_begin->format('Y-m-d')?> -> <?=$e->date_end->format('Y-m-d')?>">
                               </button>
                             </div>
                           </div>
@@ -260,6 +288,7 @@
                       }
                     }
                   }?>
+                  </div>
                   <?php foreach ($events as $e) {
                     if ($e->date_begin == $e->date_end) {
                       if ($e->date_begin == new DateTime($yearN.'-'.$monthN.'-'.$day)) { ?>
@@ -292,66 +321,40 @@
         if (!this.inArray(element)) {
           this.push(element);
         }
-      }; 
-      HTMLElement.prototype.findParentWhereGetAttribute = function(attribute, attributeValue) {
-        var parent = this;
-        do {
-          parent = (parent.parentNode == document)?false:parent.parentNode;
-        } while (parent.parentNode.getAttribute(attribute) == attributeValue || parent.parentNode == document)
-        return parent;
+      };
+      var days = document.getElementsByClassName('parent-day');
+      var btnsMargin = [];
+      for (var i = 0, limit = days.length; i < limit; i++) {
+        btnsMargin = days[i].getElementsByClassName('btn-hover');
+        for (var j = 0, max = btnsMargin.length; j < max; j++) {
+          var envent = parseInt(btnsMargin[j].getAttribute('event-in-month'));
+          btnsMargin[j].style.marginTop = (14 * envent) + 'px';
+        }
+        days[i].style.height = (8 + (14 * envent)) + 'px';
       }
       var btns = document.getElementsByClassName('btn-hover');
       var allDaysEvents = [];
-      var allEvents = [];
       for (var i = 0, limit = btns.length; i < limit; i++) {
         var classes = btns[i].className.split(/\s/);
         for (var j = 0, max = classes.length; j < max; j++) {
           if (classes[j].search(/^btn\-[\d]+$/) > -1) {
             allDaysEvents[i] = document.getElementsByClassName(classes[j]);
-            allEvents.pushIfNotExist(document.getElementsByClassName(classes[j]+'-parent'));
           }
         }
         btns[i].addEventListener('mouseover', function(i){
           return function(){
             for (var j = 0, max = allDaysEvents.length; j < max; j++) {
-              allDaysEvents[i][j].className = allDaysEvents[i][j].className.replace(/\bbtn-(success|warning|danger)\b/, 'btn-primary $1');
+              allDaysEvents[i][j].className = allDaysEvents[i][j].className.replace(/\bbtn-(success|warning|danger|info)\b/, 'btn-primary $1');
             }
           }
         }(i), false);
         btns[i].addEventListener('mouseout', function(i){
           return function(){
             for (var j = 0, max = allDaysEvents.length; j < max; j++) {
-              allDaysEvents[i][j].className = allDaysEvents[i][j].className.replace(/\bbtn-primary (success|warning|danger)\b/, 'btn-$1');
+              allDaysEvents[i][j].className = allDaysEvents[i][j].className.replace(/\bbtn-primary (success|warning|danger|info)\b/, 'btn-$1');
             }
           }
         }(i), false);
-      }
-      console.log(allEvents);
-      for (var i = 0, limit = allEvents.length; i < limit; i++) {
-        var dist = 0;
-        var moreDistant = 0;
-        var topMargin = 0;
-        var minDistant = 0;
-        for (var j = 0, max = allEvents[i].length; j < max; j++) {
-          if (allEvents[i][j].findParentWhereGetAttribute('parent-day', 'day') != false) {
-            dist = allEvents[i][j].getBoundingClientRect().top - allEvents[i][j].findParentWhereGetAttribute('parent-day', 'day').getBoundingClientRect().top;
-            moreDistant = (dist > moreDistant)?dist:moreDistant;
-            if (dist < moreDistant) {
-              var margin = moreDistant - dist;
-              allEvents[i][j].getElementsByClassName('btn-hover')[0].style.marginTop = margin + 'px';
-            }
-          }
-        }
-        for (var j = allEvents[i].length - 1, max = - 1; j > max; j--) {
-          if (allEvents[i][j].findParentWhereGetAttribute('parent-day', 'day') != false) {
-            dist = allEvents[i][j].getBoundingClientRect().top - allEvents[i][j].findParentWhereGetAttribute('parent-day', 'day').getBoundingClientRect().top;
-            moreDistant = (dist > moreDistant)?dist:moreDistant;
-            if (dist < moreDistant) {
-              var margin = moreDistant - dist;
-              allEvents[i][j].getElementsByClassName('btn-hover')[0].style.marginTop = margin + 'px';
-            }
-          }
-        }
       }
     </script>
   </body>
