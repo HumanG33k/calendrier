@@ -348,14 +348,14 @@
         }
         btns[i].addEventListener('mouseover', function(i){
           return function(){
-            for (var j = 0, max = allDaysEvents.length; j < max; j++) {
+            for (var j = 0, max = allDaysEvents[i].length; j < max; j++) {
               allDaysEvents[i][j].className = allDaysEvents[i][j].className.replace(/\bbtn-(success|warning|danger|info)\b/, 'btn-primary $1');
             }
           }
         }(i), false);
         btns[i].addEventListener('mouseout', function(i){
           return function(){
-            for (var j = 0, max = allDaysEvents.length; j < max; j++) {
+            for (var j = 0, max = allDaysEvents[i].length; j < max; j++) {
               allDaysEvents[i][j].className = allDaysEvents[i][j].className.replace(/\bbtn-primary (success|warning|danger|info)\b/, 'btn-$1');
             }
           }
